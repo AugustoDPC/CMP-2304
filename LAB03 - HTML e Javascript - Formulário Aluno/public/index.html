@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>DevTech Academy — Alunos (CRUD)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Sem CSS extra: exercício pede formulário sem CSS -->
+</head>
+
+<body>
+  <h1>Gerenciamento de Alunos — DevTech Academy</h1>
+
+  <!-- Formulário -->
+  <form id="form-aluno">
+    <div>
+      <label>Nome: <input id="nome" type="text" required /></label>
+    </div>
+    <div>
+      <label>Idade: <input id="idade" type="number" min="0" required /></label>
+    </div>
+    <div>
+      <label>Curso:
+        <select id="curso" required>
+          <option value="JavaScript">JavaScript</option>
+          <option value="Python">Python</option>
+          <option value="Java">Java</option>
+        </select>
+      </label>
+    </div>
+    <div>
+      <label>Nota Final: <input id="nota" type="number" min="0" max="10" step="0.01" required /></label>
+    </div>
+    <button type="submit">Cadastrar</button>
+    <button type="button" id="cancelar-edicao" style="display:none;">Cancelar edição</button>
+  </form>
+
+  <hr />
+
+  <!-- Tabela -->
+  <h2>Alunos</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th>Idade</th>
+        <th>Curso</th>
+        <th>Nota</th>
+        <th>Aprovado?</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tbody-alunos"></tbody>
+  </table>
+
+  <hr />
+
+  <!-- Relatórios -->
+  <h2>Relatórios</h2>
+  <div>
+    <button id="rel-aprovados">Listar aprovados (≥ 7)</button>
+    <button id="rel-media-notas">Média das notas</button>
+    <button id="rel-media-idades">Média das idades</button>
+    <button id="rel-nomes-ordem">Nomes em ordem alfabética</button>
+    <button id="rel-qtd-por-curso">Quantidade por curso</button>
+  </div>
+  <pre id="saida-relatorios"></pre>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
