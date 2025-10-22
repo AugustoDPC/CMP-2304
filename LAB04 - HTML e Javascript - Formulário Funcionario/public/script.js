@@ -1,4 +1,3 @@
-// ===== Modelo =====
 class Funcionario {
   constructor(id, nome, idade, cargo, salario) {
     this._id = id;
@@ -36,7 +35,7 @@ class Funcionario {
   }
 }
 
-// ===== Estado =====
+
 const $ = (id) => document.getElementById(id);
 const form = $("form"),
   tbody = $("tbody"),
@@ -45,7 +44,7 @@ let seq = 1,
   editId = null,
   funcionarios = [];
 
-// ===== Render da tabela =====
+
 function renderTabela() {
   tbody.innerHTML = "";
   funcionarios.forEach((f) => {
@@ -65,7 +64,7 @@ function renderTabela() {
   });
 }
 
-// ===== Helpers de relatório =====
+
 function limpaRel() {
   rel.innerHTML = "";
 }
@@ -75,7 +74,6 @@ function addLi(txt) {
   rel.appendChild(li);
 }
 
-// ===== Relatórios (via botões) =====
 function relSalariosMaior5k() {
   limpaRel();
   const lista = funcionarios
@@ -123,7 +121,6 @@ function relQuantidadePorCargo() {
   Object.entries(cont).forEach(([cargo, qtd]) => addLi(`${cargo}: ${qtd}`));
 }
 
-// ===== CRUD =====
 form.addEventListener("submit", function (e) {
   e.preventDefault();
   const nome = $("nome").value.trim();
@@ -154,7 +151,6 @@ $("cancelar").onclick = function () {
   form.reset();
 };
 
-// Delegação de eventos na tabela
 tbody.addEventListener("click", function (e) {
   const idEditar = e.target.getAttribute("data-editar");
   const idExcluir = e.target.getAttribute("data-excluir");
@@ -180,12 +176,12 @@ tbody.addEventListener("click", function (e) {
   }
 });
 
-// Liga os botões de relatório
+
 $("btnMaior5k").onclick = relSalariosMaior5k;
 $("btnMediaSalarial").onclick = relMediaSalarial;
 $("btnMediaIdades").onclick = relMediaIdades;
 $("btnNomesAZ").onclick = relNomesAZ;
 $("btnQtdCargo").onclick = relQuantidadePorCargo;
 
-// inicial
+
 renderTabela();

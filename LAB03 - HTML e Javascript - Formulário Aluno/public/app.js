@@ -1,4 +1,3 @@
-// ===== 1) Modelo: Classe Aluno =====
 class Aluno {
   constructor(nome, idade, curso, notaFinal) {
     this.nome = nome;
@@ -16,11 +15,9 @@ class Aluno {
   }
 }
 
-// ===== 2) Estado da aplicação (em memória) =====
-let alunos = []; // array de Aluno
-let indiceEdicao = -1; // -1 significa "modo cadastro", >=0 é "editando"
+let alunos = []; 
+let indiceEdicao = -1; 
 
-// ===== 3) Referências aos elementos =====
 const form = document.getElementById("form-aluno");
 const inputNome = document.getElementById("nome");
 const inputIdade = document.getElementById("idade");
@@ -39,7 +36,6 @@ const btnNomesOrdem = document.getElementById("rel-nomes-ordem");
 const btnQtdPorCurso = document.getElementById("rel-qtd-por-curso");
 const saidaRelatorio = document.getElementById("saida-relatorios");
 
-// ===== 4) Funções utilitárias =====
 const limparFormulario = () => {
   form.reset();
   indiceEdicao = -1;
@@ -84,7 +80,6 @@ const renderizarTabela = () => {
   });
 };
 
-// ===== 5) Eventos do formulário (CRUD) =====
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -101,12 +96,12 @@ form.addEventListener("submit", (e) => {
   const novo = new Aluno(nome, idade, curso, notaFinal);
 
   if (indiceEdicao === -1) {
-    // CREATE
+
     alunos.push(novo);
     console.log("Aluno cadastrado!", novo);
     alert("Aluno cadastrado!");
   } else {
-    // UPDATE
+  
     alunos[indiceEdicao] = novo;
     console.log("Aluno editado:", alunos[indiceEdicao]);
     alert("Aluno atualizado!");
@@ -116,12 +111,10 @@ form.addEventListener("submit", (e) => {
   renderizarTabela();
 });
 
-// Botão cancelar edição
 btnCancelar.addEventListener("click", () => {
   limparFormulario();
 });
 
-// Delegação de eventos na tabela (Editar/Excluir)
 tbody.addEventListener("click", (e) => {
   const botao = e.target;
   const acao = botao.getAttribute("data-acao");
@@ -141,7 +134,6 @@ tbody.addEventListener("click", (e) => {
   }
 });
 
-// ===== 6) Relatórios (filter, map, reduce, sort) =====
 btnAprovados.addEventListener("click", () => {
   const aprovados = alunos.filter((a) => a.isAprovado());
   saidaRelatorio.textContent = aprovados.length
@@ -181,12 +173,11 @@ btnQtdPorCurso.addEventListener("click", () => {
     acc[a.curso] = (acc[a.curso] || 0) + 1;
     return acc;
   }, {});
-  // formata saída
+
   const linhas = Object.entries(contagem).map(
     ([curso, qtd]) => `${curso}: ${qtd}`
   );
   saidaRelatorio.textContent = linhas.length ? linhas.join("\n") : "Sem dados.";
 });
 
-// Render inicial
 renderizarTabela();

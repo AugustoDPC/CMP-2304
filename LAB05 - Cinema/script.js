@@ -1,4 +1,4 @@
-// ---- utilidades ----
+
 function salvar(chave, obj) {
   const lista = JSON.parse(localStorage.getItem(chave)) || [];
   lista.push(obj);
@@ -10,9 +10,6 @@ function el(id) {
   return document.getElementById(id);
 }
 
-// ==========================
-// CADASTRO DE FILMES
-// ==========================
 const formFilme = el("formFilme");
 if (formFilme) {
   formFilme.onsubmit = (e) => {
@@ -29,9 +26,6 @@ if (formFilme) {
   };
 }
 
-// ==========================
-// CADASTRO DE SALAS
-// ==========================
 const formSala = el("formSala");
 if (formSala) {
   formSala.onsubmit = (e) => {
@@ -45,9 +39,7 @@ if (formSala) {
   };
 }
 
-// ==========================
-// CADASTRO DE SESSÕES
-// ==========================
+
 const formSessao = el("formSessao");
 if (formSessao) {
   const filmeSelect = el("filmeSelect");
@@ -56,7 +48,7 @@ if (formSessao) {
   const filmes = JSON.parse(localStorage.getItem("filmes")) || [];
   const salas = JSON.parse(localStorage.getItem("salas")) || [];
 
-  // popular selects somente se existirem
+
   if (filmeSelect)
     filmes.forEach((f) => {
       const op = document.createElement("option");
@@ -87,9 +79,6 @@ if (formSessao) {
   };
 }
 
-// ==========================
-// VENDA DE INGRESSOS
-// ==========================
 const formIngresso = el("formIngresso");
 if (formIngresso) {
   const sessaoSelect = el("sessaoSelect");
@@ -98,19 +87,17 @@ if (formIngresso) {
   const assento = el("assento");
   const pagamento = el("pagamento");
 
-  // popular sessões no select
+
   const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
   if (sessaoSelect) {
     sessoes.forEach((s, idx) => {
       const op = document.createElement("option");
-      // value pode ser o índice ou um texto; aqui deixo o texto para simplicidade
       op.value = `${s.filme} - ${s.dataHora}`;
       op.textContent = `${s.filme} - ${s.dataHora}`;
       sessaoSelect.appendChild(op);
     });
   }
 
-  // máscara de CPF (somente nesta página)
   if (cpf) {
     cpf.addEventListener("input", () => {
       let valor = cpf.value.replace(/\D/g, "");
@@ -145,16 +132,13 @@ if (formIngresso) {
   };
 }
 
-// ==========================
-// LISTAGEM DE SESSÕES
-// ==========================
 const listaSessoes = el("listaSessoes");
 if (listaSessoes) {
   const sessoes = JSON.parse(localStorage.getItem("sessoes")) || [];
   if (sessoes.length === 0) {
     listaSessoes.innerHTML = "<p>Nenhuma sessão cadastrada.</p>";
   } else {
-    listaSessoes.innerHTML = ""; // limpa antes de preencher
+    listaSessoes.innerHTML = "";
     sessoes.forEach((s) => {
       const card = document.createElement("div");
       card.className = "card mb-2 p-2";
