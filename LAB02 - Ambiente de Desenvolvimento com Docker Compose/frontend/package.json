@@ -1,0 +1,11 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "Frontend React/Vite placeholder",
+  "scripts": {
+    "dev": "echo Frontend container esta rodando"
+  },
+  "dependencies": {
+    "react": "^18.3.1"
+  }
+}

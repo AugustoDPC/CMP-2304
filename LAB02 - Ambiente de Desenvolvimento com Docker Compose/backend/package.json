@@ -1,0 +1,11 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend NestJS placeholder",
+  "scripts": {
+    "start:dev": "echo 'Backend container is running!' && sleep infinity"
+  },
+  "dependencies": {
+    "@nestjs/core": "^10.0.0"
+  }
+}
