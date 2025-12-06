@@ -1,19 +1,154 @@
 {
-  "usuarios": [
+  "filmes": [
     {
-      "nome": "MONICA J. SILVA",
-      "email": "monica@gmail.com",
-      "senha": "123456",
-      "status": "inativo",
-      "id": "137c"
+      "id": "1c15",
+      "titulo": "homem aranha",
+      "sinopse": "fghdsfg452rg",
+      "duracao": 435,
+      "classificacao": "10 anos",
+      "genero": "Comédia",
+      "dataInicialExibicao": "2025-12-03",
+      "dataFinalExibicao": "2025-12-24"
+    }
+  ],
+  "salas": [
+    {
+      "id": "7ce7",
+      "numero": 104,
+      "capacidade": 60,
+      "poltronas": [
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ],
+        [
+          false,
+          false,
+          false
+        ]
+      ]
+    }
+  ],
+  "sessoes": [
+    {
+      "id": "711b",
+      "filmeId": "1c15",
+      "salaId": "7ce7",
+      "dataHora": "2025-12-17T00:25"
+    }
+  ],
+  "ingressos": [
+    {
+      "id": "ae5a",
+      "sessaoId": "ab07",
+      "assento": "A1",
+      "tipo": "INTEIRA",
+      "valor": 20
     },
     {
-      "nome": "MIGULE C. ",
-      "email": "miguel@gmail.com",
-      "senha": "dandan",
-      "status": "inativo",
-      "id": "0f1d"
+      "id": "65aa",
+      "sessaoId": "711b",
+      "assento": "F8",
+      "tipo": "INTEIRA",
+      "valor": 20
     },
-  
+    {
+      "id": "3723",
+      "sessaoId": "711b",
+      "assento": "F9",
+      "tipo": "INTEIRA",
+      "valor": 20
+    }
   ]
 }
