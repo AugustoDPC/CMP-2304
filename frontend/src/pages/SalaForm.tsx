@@ -26,7 +26,6 @@ export function SalaForm() {
       const assentos = Number(dadosFormulario.assentosPorFileira);
       const capacidade = fileiras * assentos;
 
-      // Validar dados básicos
       if (fileiras <= 0 || assentos <= 0) {
         setErros({ ...erros, capacidade: "Defina fileiras e assentos válidos" });
         return;
@@ -37,10 +36,8 @@ export function SalaForm() {
         capacidade: capacidade
       };
 
-      // Validar com Zod
       const salaValidada = salaSchema.parse(salaParaValidar);
 
-      // Gerar matriz de poltronas (false = livre)
       const poltronas = Array.from({ length: fileiras }, () => 
         Array(assentos).fill(false)
       );

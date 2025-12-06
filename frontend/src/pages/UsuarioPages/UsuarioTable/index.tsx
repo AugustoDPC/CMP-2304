@@ -6,7 +6,7 @@ interface UsuarioTableProps {
     usuarios: IUsuario[];
     onEdit: (usuario: IUsuario) => void;
     onDelete: (usuarioId: string) => void;
-    usuarioEmEdicao: IUsuario | null; // Nova prop
+    usuarioEmEdicao: IUsuario | null;
 }
 
 export const UsuarioTable = (

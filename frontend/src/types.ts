@@ -19,13 +19,11 @@ export const salaSchema = z.object({
   id: z.string().optional(),
   numero: z.coerce.number().min(1, "O número da sala é obrigatório"),
   capacidade: z.coerce.number().min(1, "A capacidade deve ser maior que 0"),
-  // Poltronas será uma matriz de booleanos (true = ocupada, false = livre) ou objetos
-  // Para simplificar no cadastro, vamos gerar automaticamente baseado na capacidade ou dimensões fixas
-  // Mas no schema de validação de cadastro, talvez não precisemos passar as poltronas explicitamente
+
 });
 
 export type Sala = z.infer<typeof salaSchema> & {
-  poltronas?: boolean[][]; // Matriz de assentos
+  poltronas?: boolean[][];
 };
 
 // --- SESSÕES ---

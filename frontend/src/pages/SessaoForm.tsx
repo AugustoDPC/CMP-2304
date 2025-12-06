@@ -43,10 +43,8 @@ export function SessaoForm() {
     e.preventDefault();
 
     try {
-      // Validação com Zod
       const sessaoValidada = sessaoSchema.parse(dadosFormulario);
 
-      // Enviar para API
       await api.criarSessao(sessaoValidada);
 
       alert('Sessão agendada com sucesso!');
@@ -54,7 +52,7 @@ export function SessaoForm() {
 
     } catch (erro: unknown) {
 
-      // Se for erro de validação do Zod
+
       if (erro instanceof z.ZodError) {
         const novosErros: Record<string, string> = {};
 
@@ -70,7 +68,6 @@ export function SessaoForm() {
         return;
       }
 
-      // Outros erros
       console.error(erro);
       alert('Erro ao agendar sessão');
     }

@@ -6,7 +6,7 @@ import type { Sessao, Filme, Sala, Ingresso } from '../types';
 type AssentoStatus = 'livre' | 'ocupado' | 'selecionado';
 
 interface AssentoUI {
-  id: string; // Ex: A1, A2...
+  id: string; 
   status: AssentoStatus;
 }
 
@@ -20,7 +20,6 @@ export function VendaIngresso() {
   const [assentos, setAssentos] = useState<AssentoUI[]>([]);
   const [carregando, setCarregando] = useState(true);
   
-  // Estado para assentos selecionados: Map<AssentoID, TipoIngresso>
   const [selecionados, setSelecionados] = useState<Map<string, 'INTEIRA' | 'MEIA'>>(new Map());
 
   useEffect(() => {

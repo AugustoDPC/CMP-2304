@@ -26,16 +26,13 @@ export function FilmeForm() {
     e.preventDefault();
     
     try {
-      // Converter tipos para validação
       const filmeParaValidar = {
         ...dadosFormulario,
         duracao: Number(dadosFormulario.duracao),
       };
 
-      // Validar com Zod
       const filmeValidado = filmeSchema.parse(filmeParaValidar);
 
-      // Enviar para API
       await api.criarFilme(filmeValidado);
       
       alert('Filme cadastrado com sucesso!');

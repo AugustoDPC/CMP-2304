@@ -8,7 +8,7 @@ interface UsuarioFormProps {
     usuario: IUsuario | null;
     onSave: (usuario: IUsuario) => void;
     onCancel: () => void;
-    errors?: Record<string, string>; // Recebe erros do pai
+    errors?: Record<string, string>;
 }
 
 export const UsuarioForm = (

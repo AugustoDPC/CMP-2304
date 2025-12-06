@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import type { Sessao, Filme, Sala } from '../types';
 
-// Tipo estendido para exibição
 type SessaoComDados = Sessao & {
   filme?: Filme;
   sala?: Sala;
@@ -25,7 +24,7 @@ export function Sessoes() {
         api.listarSalas()
       ]);
 
-      // Cruzar dados
+
       const sessoesCompletas = dadosSessoes.map(sessao => ({
         ...sessao,
         filme: dadosFilmes.find(f => f.id === sessao.filmeId),
