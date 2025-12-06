@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Venda de Ingressos</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">🎬 Cinema</a>
+      <div>
+        <a class="btn btn-outline-light btn-sm" href="cadastro-filmes.html">Filmes</a>
+        <a class="btn btn-outline-light btn-sm" href="cadastro-salas.html">Salas</a>
+        <a class="btn btn-outline-light btn-sm" href="cadastro-sessoes.html">Sessões</a>
+        <a class="btn btn-outline-light btn-sm" href="venda-ingressos.html">Ingressos</a>
+        <a class="btn btn-outline-light btn-sm" href="sessoes.html">Listar Sessões</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h2>Venda de Ingressos</h2>
+    <form id="formIngresso">
+      <select class="form-control mb-2" id="sessaoSelect"></select>
+      <input class="form-control mb-2" placeholder="Nome do Cliente" id="cliente">
+      <input type="text" class="form-control mb-2" id="cpf" placeholder="000.000.000-00" maxlength="14" required>
+      <input class="form-control mb-2" placeholder="Assento (ex: A10)" id="assento">
+      <select class="form-control mb-2" id="pagamento">
+        <option>Cartão</option>
+        <option>Pix</option>
+        <option>Dinheiro</option>
+      </select>
+      <button class="btn btn-primary">Confirmar Venda</button>
+    </form>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+
+</html>

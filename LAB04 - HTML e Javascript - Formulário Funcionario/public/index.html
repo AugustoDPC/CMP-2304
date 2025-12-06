@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Funcionários</title>
+</head>
+
+<body>
+  <h2>Gestão de Funcionários (HTML + JS puros)</h2>
+
+  <form id="form">
+    <input id="nome" placeholder="Nome" required>
+    <input id="idade" type="number" placeholder="Idade" required>
+    <input id="cargo" placeholder="Cargo" required>
+    <input id="salario" type="number" step="0.01" placeholder="Salário" required>
+    <button>Salvar</button>
+    <button type="button" id="cancelar">Cancelar edição</button>
+  </form>
+
+  <h3>Lista</h3>
+  <table border="1" cellpadding="4">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th>Idade</th>
+        <th>Cargo</th>
+        <th>Salário</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+
+  <h3>Relatórios</h3>
+  <div id="botoes-relatorios">
+    <button id="btnMaior5k">Salários &gt; 5000</button>
+    <button id="btnMediaSalarial">Média salarial</button>
+    <button id="btnMediaIdades">Média das idades</button>
+    <button id="btnNomesAZ">Nomes em ordem alfabética</button>
+    <button id="btnQtdCargo">Quantidade por cargo</button>
+  </div>
+  <ul id="relatorios"></ul>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
