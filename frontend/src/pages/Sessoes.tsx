@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import type { Sessao, Filme, Sala } from '../types';
+import { Cabecalho } from '../components/Cabecalho';
+import { Carregando } from '../components/Carregando';
+import { EstadoVazio } from '../components/EstadoVazio';
+import { CartaoSessao } from '../components/CartaoSessao';
 
+// Tipo estendido para exibição
 type SessaoComDados = Sessao & {
   filme?: Filme;
   sala?: Sala;
@@ -10,7 +14,7 @@ type SessaoComDados = Sessao & {
 
 export function Sessoes() {
   const [sessoes, setSessoes] = useState<SessaoComDados[]>([]);
-  const [carregando, setCarregando] = useState(true);
+  const [estaCarregando, setEstaCarregando] = useState(true);
 
   useEffect(() => {
     carregarDados();
@@ -24,7 +28,7 @@ export function Sessoes() {
         api.listarSalas()
       ]);
 
-
+      // Cruzar dados
       const sessoesCompletas = dadosSessoes.map(sessao => ({
         ...sessao,
         filme: dadosFilmes.find(f => f.id === sessao.filmeId),
@@ -36,7 +40,7 @@ export function Sessoes() {
       console.error('Erro ao carregar dados:', erro);
       alert('Erro ao carregar sessões');
     } finally {
-      setCarregando(false);
+      setEstaCarregando(false);
     }
   }
 
@@ -52,50 +56,28 @@ export function Sessoes() {
     }
   }
 
-  if (carregando) {
-    return <div className="text-center mt-5">Carregando...</div>;
+  if (estaCarregando) {
+    return <Carregando />;
   }
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Sessões Agendadas</h2>
-        <Link to="/sessoes/novo" className="btn btn-primary">
-          <i className="bi bi-plus-lg me-2"></i>Nova Sessão
-        </Link>
-      </div>
+      <Cabecalho 
+        titulo="Sessões Agendadas" 
+        textoBotao="Nova Sessão" 
+        linkBotao="/sessoes/novo" 
+      />
 
       {sessoes.length === 0 ? (
-        <p className="text-muted">Nenhuma sessão agendada.</p>
+        <EstadoVazio mensagem="Nenhuma sessão agendada." />
       ) : (
         <div className="row row-cols-1 row-cols-md-2 g-4">
           {sessoes.map((sessao) => (
-            <div className="col" key={sessao.id}>
-              <div className="card h-100 shadow-sm border-start border-4 border-primary">
-                <div className="card-body">
-                  <h5 className="card-title">{sessao.filme?.titulo || 'Filme não encontrado'}</h5>
-                  <h6 className="card-subtitle mb-2 text-muted">
-                    Sala {sessao.sala?.numero || '?'} - {new Date(sessao.dataHora).toLocaleString()}
-                  </h6>
-                  <p className="card-text">
-                    <span className="badge bg-secondary me-2">{sessao.filme?.genero}</span>
-                    <span className="badge bg-info text-dark">{sessao.filme?.classificacao}</span>
-                  </p>
-                </div>
-                <div className="card-footer bg-transparent border-top-0 d-flex justify-content-between">
-                  <Link to={`/sessoes/${sessao.id}/vender`} className="btn btn-success btn-sm">
-                    <i className="bi bi-ticket-perforated me-1"></i>Vender Ingresso
-                  </Link>
-                  <button 
-                    onClick={() => lidarComExclusao(sessao.id!)} 
-                    className="btn btn-outline-danger btn-sm"
-                    title="Cancelar Sessão"
-                  >
-                    <i className="bi bi-trash"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
+            <CartaoSessao 
+              key={sessao.id} 
+              sessao={sessao} 
+              aoExcluir={lidarComExclusao} 
+            />
           ))}
         </div>
       )}

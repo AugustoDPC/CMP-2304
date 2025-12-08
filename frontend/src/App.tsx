@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Filmes } from './pages/Filmes';
 import { FilmeForm } from './pages/FilmeForm';
@@ -8,6 +8,9 @@ import { Sessoes } from './pages/Sessoes';
 import { SessaoForm } from './pages/SessaoForm';
 import { VendaIngresso } from './pages/VendaIngresso';
 import { Home } from './pages/Home';
+import { Lanches } from './pages/Lanches';
+import { LancheForm } from './pages/LancheForm';
+import { Pedidos } from './pages/Pedidos';
 
 function App() {
   return (
@@ -24,7 +27,14 @@ function App() {
           
           <Route path="/sessoes" element={<Sessoes />} />
           <Route path="/sessoes/novo" element={<SessaoForm />} />
+          <Route path="/sessoes" element={<Sessoes />} />
+          <Route path="/sessoes/novo" element={<SessaoForm />} />
           <Route path="/sessoes/:id/vender" element={<VendaIngresso />} />
+
+          <Route path="/lanches" element={<Lanches />} />
+          <Route path="/lanches/novo" element={<LancheForm />} />
+          
+          <Route path="/pedidos" element={<Pedidos />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import type { Sala } from '../types';
+import { Cabecalho } from '../components/Cabecalho';
+import { Carregando } from '../components/Carregando';
+import { EstadoVazio } from '../components/EstadoVazio';
 
 export function Salas() {
   const [salas, setSalas] = useState<Sala[]>([]);
-  const [carregando, setCarregando] = useState(true);
+  const [estaCarregando, setEstaCarregando] = useState(true);
 
   useEffect(() => {
     carregarSalas();
@@ -19,7 +21,7 @@ export function Salas() {
       console.error('Erro ao carregar salas:', erro);
       alert('Erro ao carregar salas');
     } finally {
-      setCarregando(false);
+      setEstaCarregando(false);
     }
   }
 
@@ -35,21 +37,20 @@ export function Salas() {
     }
   }
 
-  if (carregando) {
-    return <div className="text-center mt-5">Carregando...</div>;
+  if (estaCarregando) {
+    return <Carregando />;
   }
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>Salas Cadastradas</h2>
-        <Link to="/salas/novo" className="btn btn-primary">
-          <i className="bi bi-plus-lg me-2"></i>Nova Sala
-        </Link>
-      </div>
+      <Cabecalho 
+        titulo="Salas Cadastradas" 
+        textoBotao="Nova Sala" 
+        linkBotao="/salas/novo" 
+      />
 
       {salas.length === 0 ? (
-        <p className="text-muted">Nenhuma sala cadastrada.</p>
+        <EstadoVazio mensagem="Nenhuma sala cadastrada." />
       ) : (
         <div className="table-responsive">
           <table className="table table-striped table-hover">

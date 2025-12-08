@@ -3,6 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { filmeSchema } from '../types';
 import { z } from 'zod';
+import { CampoTexto } from '../components/Formulario/CampoTexto';
+import { CampoSelect } from '../components/Formulario/CampoSelect';
+import { Botao } from '../components/Botao/Botao';
 
 export function FilmeForm() {
   const navigate = useNavigate();
@@ -17,7 +20,7 @@ export function FilmeForm() {
   });
   const [erros, setErros] = useState<Record<string, string>>({});
 
-  function lidarComMudanca(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  function lidarComMudanca(e: React.ChangeEvent<any>) {
     const { name, value } = e.target;
     setDadosFormulario(prev => ({ ...prev, [name]: value }));
   }
@@ -26,13 +29,16 @@ export function FilmeForm() {
     e.preventDefault();
     
     try {
+      // Converter tipos para validação
       const filmeParaValidar = {
         ...dadosFormulario,
         duracao: Number(dadosFormulario.duracao),
       };
 
+      // Validar com Zod
       const filmeValidado = filmeSchema.parse(filmeParaValidar);
 
+      // Enviar para API
       await api.criarFilme(filmeValidado);
       
       alert('Filme cadastrado com sucesso!');
@@ -62,105 +68,102 @@ export function FilmeForm() {
       <h2 className="mb-4">Novo Filme</h2>
       <form onSubmit={lidarComEnvio} className="row g-3">
         <div className="col-md-6">
-          <label className="form-label">Título</label>
-          <input 
-            type="text" 
-            className={`form-control ${erros.titulo ? 'is-invalid' : ''}`}
-            name="titulo" 
-            value={dadosFormulario.titulo} 
-            onChange={lidarComMudanca} 
+          <CampoTexto
+            label="Título"
+            name="titulo"
+            value={dadosFormulario.titulo}
+            onChange={lidarComMudanca}
+            erro={erros.titulo}
           />
-          {erros.titulo && <div className="invalid-feedback">{erros.titulo}</div>}
         </div>
 
         <div className="col-md-6">
-          <label className="form-label">Gênero</label>
-          <select 
-            className={`form-select ${erros.genero ? 'is-invalid' : ''}`}
-            name="genero" 
-            value={dadosFormulario.genero} 
+          <CampoSelect
+            label="Gênero"
+            name="genero"
+            value={dadosFormulario.genero}
             onChange={lidarComMudanca}
-          >
-            <option value="">Selecione...</option>
-            <option value="Ação">Ação</option>
-            <option value="Comédia">Comédia</option>
-            <option value="Drama">Drama</option>
-            <option value="Terror">Terror</option>
-            <option value="Ficção">Ficção</option>
-          </select>
-          {erros.genero && <div className="invalid-feedback">{erros.genero}</div>}
-        </div>
-
-        <div className="col-md-4">
-          <label className="form-label">Duração (minutos)</label>
-          <input 
-            type="number" 
-            className={`form-control ${erros.duracao ? 'is-invalid' : ''}`}
-            name="duracao" 
-            value={dadosFormulario.duracao} 
-            onChange={lidarComMudanca} 
+            erro={erros.genero}
+            opcoes={[
+              { label: 'Ação', value: 'Ação' },
+              { label: 'Comédia', value: 'Comédia' },
+              { label: 'Drama', value: 'Drama' },
+              { label: 'Terror', value: 'Terror' },
+              { label: 'Ficção', value: 'Ficção' }
+            ]}
           />
-          {erros.duracao && <div className="invalid-feedback">{erros.duracao}</div>}
         </div>
 
         <div className="col-md-4">
-          <label className="form-label">Classificação</label>
-          <select 
-            className={`form-select ${erros.classificacao ? 'is-invalid' : ''}`}
-            name="classificacao" 
-            value={dadosFormulario.classificacao} 
+          <CampoTexto
+            label="Duração (minutos)"
+            name="duracao"
+            type="number"
+            value={dadosFormulario.duracao}
             onChange={lidarComMudanca}
-          >
-            <option value="">Selecione...</option>
-            <option value="Livre">Livre</option>
-            <option value="10 anos">10 anos</option>
-            <option value="12 anos">12 anos</option>
-            <option value="14 anos">14 anos</option>
-            <option value="16 anos">16 anos</option>
-            <option value="18 anos">18 anos</option>
-          </select>
-          {erros.classificacao && <div className="invalid-feedback">{erros.classificacao}</div>}
+            erro={erros.duracao}
+          />
+        </div>
+
+        <div className="col-md-4">
+          <CampoSelect
+            label="Classificação"
+            name="classificacao"
+            value={dadosFormulario.classificacao}
+            onChange={lidarComMudanca}
+            erro={erros.classificacao}
+            opcoes={[
+               { label: 'Livre', value: 'Livre' },
+               { label: '10 anos', value: '10 anos' },
+               { label: '12 anos', value: '12 anos' },
+               { label: '14 anos', value: '14 anos' },
+               { label: '16 anos', value: '16 anos' },
+               { label: '18 anos', value: '18 anos' }
+            ]}
+          />
         </div>
 
         <div className="col-12">
-          <label className="form-label">Sinopse</label>
-          <textarea 
-            className={`form-control ${erros.sinopse ? 'is-invalid' : ''}`}
-            name="sinopse" 
+          <CampoTexto
+            label="Sinopse"
+            name="sinopse"
+            textarea
             rows={3}
-            value={dadosFormulario.sinopse} 
-            onChange={lidarComMudanca} 
-          ></textarea>
-          {erros.sinopse && <div className="invalid-feedback">{erros.sinopse}</div>}
+            value={dadosFormulario.sinopse}
+            onChange={lidarComMudanca}
+            erro={erros.sinopse}
+          />
         </div>
 
         <div className="col-md-6">
-          <label className="form-label">Data Início Exibição</label>
-          <input 
-            type="date" 
-            className={`form-control ${erros.dataInicialExibicao ? 'is-invalid' : ''}`}
-            name="dataInicialExibicao" 
-            value={dadosFormulario.dataInicialExibicao} 
-            onChange={lidarComMudanca} 
+          <CampoTexto
+            label="Data Início Exibição"
+            name="dataInicialExibicao"
+            type="date"
+            value={dadosFormulario.dataInicialExibicao}
+            onChange={lidarComMudanca}
+            erro={erros.dataInicialExibicao}
           />
-          {erros.dataInicialExibicao && <div className="invalid-feedback">{erros.dataInicialExibicao}</div>}
         </div>
 
         <div className="col-md-6">
-          <label className="form-label">Data Final Exibição</label>
-          <input 
-            type="date" 
-            className={`form-control ${erros.dataFinalExibicao ? 'is-invalid' : ''}`}
-            name="dataFinalExibicao" 
-            value={dadosFormulario.dataFinalExibicao} 
-            onChange={lidarComMudanca} 
+          <CampoTexto
+            label="Data Final Exibição"
+            name="dataFinalExibicao"
+            type="date"
+            value={dadosFormulario.dataFinalExibicao}
+            onChange={lidarComMudanca}
+            erro={erros.dataFinalExibicao}
           />
-          {erros.dataFinalExibicao && <div className="invalid-feedback">{erros.dataFinalExibicao}</div>}
         </div>
 
-        <div className="col-12">
-          <button type="submit" className="btn btn-success">Salvar Filme</button>
-          <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate('/filmes')}>Cancelar</button>
+        <div className="col-12 mt-4">
+          <Botao type="submit" variant="success" className="me-2">
+            <i className="bi bi-check-lg me-2"></i>Salvar Filme
+          </Botao>
+          <Botao variant="secondary" onClick={() => navigate('/filmes')}>
+            Cancelar
+          </Botao>
         </div>
       </form>
     </div>

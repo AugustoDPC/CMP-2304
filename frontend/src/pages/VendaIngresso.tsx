@@ -1,26 +1,31 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import type { Sessao, Filme, Sala, Ingresso } from '../types';
-
-type AssentoStatus = 'livre' | 'ocupado' | 'selecionado';
-
-interface AssentoUI {
-  id: string; 
-  status: AssentoStatus;
-}
+import type { Sessao, Filme, Sala, Lanche } from '../types';
+import { Carregando } from '../components/Carregando';
+import { Cabecalho } from '../components/Cabecalho';
+import { PainelSessaoIngressos } from '../components/Venda/PainelSessaoIngressos';
+import { PainelLanches, type ItemLanche } from '../components/Venda/PainelLanches';
+import { ResumoPedido } from '../components/Venda/ResumoPedido';
 
 export function VendaIngresso() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const navegar = useNavigate();
   
   const [sessao, setSessao] = useState<Sessao | null>(null);
   const [filme, setFilme] = useState<Filme | null>(null);
   const [sala, setSala] = useState<Sala | null>(null);
-  const [assentos, setAssentos] = useState<AssentoUI[]>([]);
-  const [carregando, setCarregando] = useState(true);
+  const [ingressosVendidosCount, setIngressosVendidosCount] = useState(0);
+  const [estaCarregando, setEstaCarregando] = useState(true);
   
-  const [selecionados, setSelecionados] = useState<Map<string, 'INTEIRA' | 'MEIA'>>(new Map());
+  // Dados de Lanches
+  const [lanchesDisponiveis, setLanchesDisponiveis] = useState<Lanche[]>([]);
+  const [carrinhoLanches, setCarrinhoLanches] = useState<ItemLanche[]>([]);
+
+  // Estado do formulário simples de ingresso
+  const [tipoIngresso, setTipoIngresso] = useState<'INTEIRA' | 'MEIA'>('INTEIRA');
+  const [valorIngresso, setValorIngresso] = useState('20.00'); 
+  const [quantidadeIngressos, setQuantidadeIngressos] = useState(1);
 
   useEffect(() => {
     if (id) {
@@ -28,20 +33,26 @@ export function VendaIngresso() {
     }
   }, [id]);
 
+  useEffect(() => {
+    if (tipoIngresso === 'INTEIRA') setValorIngresso('20.00');
+    else setValorIngresso('10.00');
+  }, [tipoIngresso]);
+
   async function carregarDados(sessaoId: string) {
     try {
       const dadosSessao = await api.listarSessoes().then(lista => lista.find(s => s.id === sessaoId));
       
       if (!dadosSessao) {
         alert('Sessão não encontrada');
-        navigate('/sessoes');
+        navegar('/sessoes');
         return;
       }
       
-      const [dadosFilme, dadosSala, dadosIngressos] = await Promise.all([
+      const [dadosFilme, dadosSala, dadosIngressos, dadosLanches] = await Promise.all([
         api.obterFilme(dadosSessao.filmeId),
         api.listarSalas().then(lista => lista.find(s => s.id === dadosSessao.salaId)),
-        api.listarIngressosPorSessao(sessaoId)
+        api.listarIngressosPorSessao(sessaoId),
+        api.listarLanches()
       ]);
 
       if (!dadosSala) throw new Error('Sala não encontrada');
@@ -49,174 +60,142 @@ export function VendaIngresso() {
       setSessao(dadosSessao);
       setFilme(dadosFilme);
       setSala(dadosSala);
-
-      // Gerar mapa de assentos
-      gerarAssentos(dadosSala.capacidade, dadosIngressos);
+      setIngressosVendidosCount(dadosIngressos.length);
+      setLanchesDisponiveis(dadosLanches);
       
     } catch (erro) {
       console.error('Erro ao carregar dados:', erro);
       alert('Erro ao carregar dados da sessão');
     } finally {
-      setCarregando(false);
+      setEstaCarregando(false);
     }
   }
 
-  function gerarAssentos(capacidade: number, ingressosVendidos: Ingresso[]) {
-    const assentosGerados: AssentoUI[] = [];
-    const assentosOcupados = new Set(ingressosVendidos.map(i => i.assento));
-    
-    // Gera assentos A1, A2... B1, B2... (10 por fileira)
-    const colunas = 10;
-    const fileiras = Math.ceil(capacidade / colunas);
-    
-    let contador = 0;
-    for (let i = 0; i < fileiras; i++) {
-      const letra = String.fromCharCode(65 + i); // A, B, C...
-      for (let j = 1; j <= colunas; j++) {
-        if (contador >= capacidade) break;
-        
-        const idAssento = `${letra}${j}`;
-        assentosGerados.push({
-          id: idAssento,
-          status: assentosOcupados.has(idAssento) ? 'ocupado' : 'livre'
-        });
-        contador++;
+  function adicionarLanche(lanche: Lanche) {
+    setCarrinhoLanches(prev => {
+      const existente = prev.find(item => item.lanche.id === lanche.id);
+      if (existente) {
+        return prev.map(item => 
+          item.lanche.id === lanche.id 
+            ? { ...item, quantidade: item.quantidade + 1 } 
+            : item
+        );
       }
-    }
-    setAssentos(assentosGerados);
+      return [...prev, { lanche, quantidade: 1 }];
+    });
   }
 
-  function alternarAssento(assentoId: string) {
-    const novosSelecionados = new Map(selecionados);
-    if (novosSelecionados.has(assentoId)) {
-      novosSelecionados.delete(assentoId);
-    } else {
-      novosSelecionados.set(assentoId, 'INTEIRA'); // Default
-    }
-    setSelecionados(novosSelecionados);
+  function removerLanche(lancheId: string) {
+    setCarrinhoLanches(prev => {
+      return prev.map(item => {
+        if (item.lanche.id === lancheId) {
+          return { ...item, quantidade: Math.max(0, item.quantidade - 1) };
+        }
+        return item;
+      }).filter(item => item.quantidade > 0);
+    });
   }
 
-  function mudarTipoIngresso(assentoId: string, tipo: 'INTEIRA' | 'MEIA') {
-    const novosSelecionados = new Map(selecionados);
-    novosSelecionados.set(assentoId, tipo);
-    setSelecionados(novosSelecionados);
-  }
+  const totalIngressos = Number(valorIngresso) * quantidadeIngressos;
+  const totalLanches = carrinhoLanches.reduce((acc, item) => acc + (item.lanche.preco * item.quantidade), 0);
+  const totalGeral = totalIngressos + totalLanches;
 
-  async function finalizarVenda() {
-    if (selecionados.size === 0) return;
+  async function finalizarPedido(e: React.FormEvent) {
+    e.preventDefault();
     
-    if (!confirm(`Confirmar venda de ${selecionados.size} ingressos?`)) return;
+    if (!sessao || !sala) return;
+
+    if (ingressosVendidosCount + quantidadeIngressos > sala.capacidade) {
+      alert('Não há lugares suficientes para essa quantidade de ingressos!');
+      return;
+    }
+
+    if (!confirm(`Confirmar PEDIDO no valor total de R$ ${totalGeral.toFixed(2)}?`)) return;
 
     try {
-      const promises = Array.from(selecionados.entries()).map(([assento, tipo]) => {
-        return api.criarIngresso({
-          sessaoId: sessao!.id!,
-          assento,
-          tipo,
-          valor: tipo === 'INTEIRA' ? 20 : 10 // Preço fixo por enquanto
+      // 1. Gerar Ingressos
+      const novosIngressos = [];
+      for (let i = 0; i < quantidadeIngressos; i++) {
+        const proximoNumero = ingressosVendidosCount + i + 1;
+        novosIngressos.push({
+            sessaoId: sessao.id!,
+            assento: `Assento ${proximoNumero}`,
+            tipo: tipoIngresso,
+            valor: Number(valorIngresso)
         });
+      }
+
+      // 2. Preparar dados dos Lanches
+      const itensPedido = carrinhoLanches.map(item => ({
+        lancheId: item.lanche.id!,
+        quantidade: item.quantidade,
+        precoUnitario: item.lanche.preco,
+        nomeLanche: item.lanche.nome
+      }));
+
+      // 3. Criar Pedido
+      await api.criarPedido({
+        dataPedido: new Date().toISOString(),
+        ingressos: novosIngressos,
+        lanches: itensPedido,
+        valorTotal: totalGeral,
+        sessaoId: sessao.id
       });
 
-      await Promise.all(promises);
-      
-      alert('Venda realizada com sucesso!');
-      navigate('/sessoes');
+      // Hack para json-server: salvar ingressos avulsos para contar ocupação
+      await Promise.all(novosIngressos.map(ing => api.criarIngresso(ing)));
+
+      alert('Pedido realizado com sucesso!');
+      navegar('/pedidos'); 
       
     } catch (erro) {
       console.error('Erro na venda:', erro);
-      alert('Erro ao processar venda');
+      alert('Erro ao processar pedido. Tente novamente.');
     }
   }
 
-  const total = Array.from(selecionados.values()).reduce((acc, tipo) => acc + (tipo === 'INTEIRA' ? 20 : 10), 0);
+  if (estaCarregando) return <Carregando />;
+  if (!sessao || !filme || !sala) return <div>Erro ao carregar sessão.</div>;
 
-  if (carregando) return <div className="text-center mt-5">Carregando...</div>;
+  const lugaresDisponiveis = sala.capacidade - ingressosVendidosCount;
 
   return (
-    <div className="container">
-      <div className="row mb-4">
-        <div className="col">
-          <h2>Venda de Ingressos</h2>
-          <h5 className="text-muted">{filme?.titulo}</h5>
-          <p>Sala {sala?.numero} - {new Date(sessao!.dataHora).toLocaleString()}</p>
-        </div>
-      </div>
+    <div>
+       <Cabecalho titulo="Realizar Pedido" />
 
       <div className="row">
-        {/* Mapa de Assentos */}
-        <div className="col-md-7 mb-4">
-          <div className="card shadow-sm">
-            <div className="card-header bg-dark text-white text-center">TELA</div>
-            <div className="card-body text-center">
-              <div className="d-flex flex-wrap justify-content-center gap-2" style={{ maxWidth: '400px', margin: '0 auto' }}>
-                {assentos.map(assento => {
-                  const isSelected = selecionados.has(assento.id);
-                  let btnClass = 'btn-outline-secondary';
-                  if (assento.status === 'ocupado') btnClass = 'btn-danger disabled';
-                  else if (isSelected) btnClass = 'btn-success';
-
-                  return (
-                    <button
-                      key={assento.id}
-                      className={`btn ${btnClass} btn-sm`}
-                      style={{ width: '40px', height: '40px' }}
-                      onClick={() => assento.status === 'livre' && alternarAssento(assento.id)}
-                      disabled={assento.status === 'ocupado'}
-                    >
-                      {assento.id}
-                    </button>
-                  );
-                })}
-              </div>
-              
-              <div className="mt-4 d-flex justify-content-center gap-3">
-                <div><span className="badge bg-secondary">Livre</span></div>
-                <div><span className="badge bg-success">Selecionado</span></div>
-                <div><span className="badge bg-danger">Ocupado</span></div>
-              </div>
-            </div>
-          </div>
+        {/* Coluna Esquerda: Sessão e Ingressos */}
+        <div className="col-lg-6 mb-4">
+          <PainelSessaoIngressos 
+            filme={filme}
+            sala={sala}
+            sessao={sessao}
+            lugaresDisponiveis={lugaresDisponiveis}
+            tipoIngresso={tipoIngresso}
+            setTipoIngresso={setTipoIngresso}
+            quantidadeIngressos={quantidadeIngressos}
+            setQuantidadeIngressos={setQuantidadeIngressos}
+            valorIngresso={valorIngresso}
+            totalIngressos={totalIngressos}
+          />
         </div>
 
-        {/* Resumo da Compra */}
-        <div className="col-md-5">
-          <div className="card shadow-sm">
-            <div className="card-header">Resumo da Compra</div>
-            <div className="card-body">
-              {selecionados.size === 0 ? (
-                <p className="text-muted text-center">Selecione assentos no mapa.</p>
-              ) : (
-                <ul className="list-group list-group-flush mb-3">
-                  {Array.from(selecionados.entries()).map(([assento, tipo]) => (
-                    <li key={assento} className="list-group-item d-flex justify-content-between align-items-center">
-                      <span>Assento <strong>{assento}</strong></span>
-                      <select 
-                        className="form-select form-select-sm w-auto"
-                        value={tipo}
-                        onChange={(e) => mudarTipoIngresso(assento, e.target.value as 'INTEIRA' | 'MEIA')}
-                      >
-                        <option value="INTEIRA">Inteira (R$ 20)</option>
-                        <option value="MEIA">Meia (R$ 10)</option>
-                      </select>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              
-              <div className="d-flex justify-content-between align-items-center border-top pt-3">
-                <h4>Total:</h4>
-                <h4 className="text-primary">R$ {total.toFixed(2)}</h4>
-              </div>
-              
-              <button 
-                className="btn btn-primary w-100 mt-3" 
-                disabled={selecionados.size === 0}
-                onClick={finalizarVenda}
-              >
-                Finalizar Venda
-              </button>
-            </div>
-          </div>
+        {/* Coluna Direita: Lanches e Finalização */}
+        <div className="col-lg-6 mb-4">
+          <PainelLanches 
+            lanchesDisponiveis={lanchesDisponiveis}
+            carrinhoLanches={carrinhoLanches}
+            adicionarLanche={adicionarLanche}
+            removerLanche={removerLanche}
+            totalLanches={totalLanches}
+          />
+
+          <ResumoPedido 
+            totalGeral={totalGeral}
+            onConfirmar={finalizarPedido}
+            onCancelar={() => navegar('/sessoes')}
+            desabilitado={lugaresDisponiveis <= 0 && quantidadeIngressos > 0}
+          />
         </div>
       </div>
     </div>

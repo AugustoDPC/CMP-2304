@@ -1,41 +1,44 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
-import { salaSchema } from '../types';
+import { lancheSchema } from '../types';
 import { z } from 'zod';
 import { Cabecalho } from '../components/Cabecalho';
+import { Carregando } from '../components/Carregando';
 import { CampoTexto } from '../components/Formulario/CampoTexto';
 import { Botao } from '../components/Botao/Botao';
 
-export function SalaForm() {
+export function LancheForm() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [carregando, setCarregando] = useState(false);
   
   const [dadosFormulario, setDadosFormulario] = useState({
-    numero: '',
-    capacidade: ''
+    nome: '',
+    descricao: '',
+    preco: ''
   });
   const [erros, setErros] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (id) {
-      carregarSala(id);
+      carregarLanche(id);
     }
   }, [id]);
 
-  async function carregarSala(id: string) {
+  async function carregarLanche(id: string) {
     setCarregando(true);
     try {
-      const sala = await api.obterSala(id);
+      const lanche = await api.obterLanche(id);
       setDadosFormulario({
-        numero: String(sala.numero),
-        capacidade: String(sala.capacidade)
+        nome: lanche.nome,
+        descricao: lanche.descricao || '',
+        preco: String(lanche.preco)
       });
     } catch (error) {
       console.error(error);
-      alert('Erro ao carregar sala');
-      navigate('/salas');
+      alert('Erro ao carregar lanche');
+      navigate('/lanches');
     } finally {
       setCarregando(false);
     }
@@ -50,74 +53,86 @@ export function SalaForm() {
     e.preventDefault();
     
     try {
-      const salaParaValidar = {
-        numero: Number(dadosFormulario.numero),
-        capacidade: Number(dadosFormulario.capacidade),
-        poltronas: id ? [] : [[]] 
+      const lancheParaValidar = {
+        nome: dadosFormulario.nome,
+        descricao: dadosFormulario.descricao,
+        preco: Number(dadosFormulario.preco)
       };
 
-      const salaValidada = salaSchema.parse(salaParaValidar);
+      const lancheValidado = lancheSchema.parse(lancheParaValidar);
 
       if (id) {
-         // Atualização mockada
-         alert('Edição ainda não implementada completamente na API, criando nova para teste.');
+        // TODO: Implementar atualização se API suportar
+        alert('Edição ainda não implementada na API, criando novo.');
       }
       
-      await api.criarSala(salaValidada);
+      await api.criarLanche(lancheValidado);
       
-      alert('Sala salva com sucesso!');
-      navigate('/salas');
+      alert('Lanche salvo com sucesso!');
+      navigate('/lanches');
       
     } catch (erro) {
       if (erro instanceof z.ZodError) {
         const novosErros: Record<string, string> = {};
         erro.issues.forEach(issue => {
-           if (issue.path[0]) {
-             novosErros[issue.path[0].toString()] = issue.message;
-           }
+          if (issue.path[0]) {
+            novosErros[issue.path[0].toString()] = issue.message;
+          }
         });
         setErros(novosErros);
       } else {
         console.error(erro);
-        alert('Erro ao salvar sala');
+        alert('Erro ao salvar lanche');
       }
     }
   }
 
-  if (carregando) return <div className="text-center mt-5"><div className="spinner-border text-primary"></div></div>;
+  if (carregando) return <Carregando />;
 
   return (
     <div>
-      <Cabecalho titulo={id ? "Editar Sala" : "Nova Sala"} />
+      <Cabecalho titulo={id ? "Editar Lanche" : "Novo Lanche"} />
       
       <form onSubmit={lidarComEnvio} className="row g-3">
         <div className="col-md-6">
           <CampoTexto
-            label="Número da Sala"
-            name="numero"
-            type="number"
-            value={dadosFormulario.numero}
+            label="Nome do Lanche"
+            name="nome"
+            value={dadosFormulario.nome}
             onChange={lidarComMudanca}
-            erro={erros.numero}
+            erro={erros.nome}
           />
         </div>
 
         <div className="col-md-6">
           <CampoTexto
-            label="Capacidade de Pessoas"
-            name="capacidade"
+            label="Preço (R$)"
+            name="preco"
             type="number"
-            value={dadosFormulario.capacidade}
+            step="0.01"
+            value={dadosFormulario.preco}
             onChange={lidarComMudanca}
-            erro={erros.capacidade}
+            erro={erros.preco}
           />
         </div>
-        
+
+        <div className="col-12">
+          <CampoTexto
+            label="Descrição"
+            name="descricao"
+            textarea
+            rows={3}
+            value={dadosFormulario.descricao}
+            onChange={lidarComMudanca}
+            erro={erros.descricao}
+          />
+        </div>
+
         <div className="col-12 mt-4">
           <Botao type="submit" variant="success" className="me-2">
-            <i className="bi bi-check-lg me-2"></i>Salvar Sala
+            <i className="bi bi-check-lg me-2"></i>Salvar
           </Botao>
-          <Botao variant="secondary" onClick={() => navigate('/salas')}>
+          <Botao variant="secondary" onClick={() => navigate('/lanches')}>
             Cancelar
           </Botao>
         </div>

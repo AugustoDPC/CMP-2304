@@ -1,134 +1,125 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import { sessaoSchema, type Filme, type Sala } from '../types';
+import { sessaoSchema } from '../types';
+import type { Filme, Sala } from '../types';
 import { z } from 'zod';
+import { Cabecalho } from '../components/Cabecalho';
+import { CampoTexto } from '../components/Formulario/CampoTexto';
+import { CampoSelect } from '../components/Formulario/CampoSelect';
+import { Botao } from '../components/Botao/Botao';
 
 export function SessaoForm() {
   const navigate = useNavigate();
-  const [filmes, setFilmes] = useState<Filme[]>([]);
-  const [salas, setSalas] = useState<Sala[]>([]);
-  
   const [dadosFormulario, setDadosFormulario] = useState({
     filmeId: '',
     salaId: '',
     dataHora: ''
   });
+  const [filmes, setFilmes] = useState<Filme[]>([]);
+  const [salas, setSalas] = useState<Sala[]>([]);
   const [erros, setErros] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    carregarOpcoes();
+    carregarDados();
   }, []);
 
-  async function carregarOpcoes() {
+  async function carregarDados() {
     try {
-      const [dadosFilmes, dadosSalas] = await Promise.all([
+      const [filmesCarregados, salasCarregadas] = await Promise.all([
         api.listarFilmes(),
-        api.listarSalas()
+        api.listarSalas(),
       ]);
-      setFilmes(dadosFilmes);
-      setSalas(dadosSalas);
-    } catch (erro) {
-      console.error('Erro ao carregar opções:', erro);
-      alert('Erro ao carregar filmes e salas');
+      setFilmes(filmesCarregados);
+      setSalas(salasCarregadas);
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao carregar dados');
     }
   }
 
-  function lidarComMudanca(e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) {
+  function lidarComMudanca(e: React.ChangeEvent<any>) {
     const { name, value } = e.target;
     setDadosFormulario(prev => ({ ...prev, [name]: value }));
   }
 
   async function lidarComEnvio(e: React.FormEvent) {
     e.preventDefault();
-
+    
     try {
       const sessaoValidada = sessaoSchema.parse(dadosFormulario);
 
       await api.criarSessao(sessaoValidada);
-
+      
       alert('Sessão agendada com sucesso!');
       navigate('/sessoes');
-
-    } catch (erro: unknown) {
-
-
+      
+    } catch (erro) {
       if (erro instanceof z.ZodError) {
         const novosErros: Record<string, string> = {};
-
+        
         erro.issues.forEach(issue => {
-          const field = issue.path[0]; 
-
-          if (typeof field === "string") {
-            novosErros[field] = issue.message;
+          const field = issue.path[0];
+          if (field) {
+            novosErros[field.toString()] = issue.message;
           }
         });
-
+        
         setErros(novosErros);
-        return;
+      } else {
+        console.error(erro);
+        alert('Erro ao salvar sessão');
       }
-
-      console.error(erro);
-      alert('Erro ao agendar sessão');
     }
   }
 
-
   return (
     <div>
-      <h2 className="mb-4">Agendar Sessão</h2>
+      <Cabecalho titulo="Agendar Sessão" />
+      
       <form onSubmit={lidarComEnvio} className="row g-3">
         <div className="col-md-6">
-          <label className="form-label">Filme</label>
-          <select 
-            className={`form-select ${erros.filmeId ? 'is-invalid' : ''}`}
-            name="filmeId" 
-            value={dadosFormulario.filmeId} 
-            onChange={lidarComMudanca}
-          >
-            <option value="">Selecione um filme...</option>
-            {filmes.map(filme => (
-              <option key={filme.id} value={filme.id}>
-                {filme.titulo}
-              </option>
-            ))}
-          </select>
-          {erros.filmeId && <div className="invalid-feedback">{erros.filmeId}</div>}
-        </div>
-
-        <div className="col-md-6">
-          <label className="form-label">Sala</label>
-          <select 
-            className={`form-select ${erros.salaId ? 'is-invalid' : ''}`}
-            name="salaId" 
-            value={dadosFormulario.salaId} 
-            onChange={lidarComMudanca}
-          >
-            <option value="">Selecione uma sala...</option>
-            {salas.map(sala => (
-              <option key={sala.id} value={sala.id}>
-                Sala {sala.numero} ({sala.capacidade} lugares)
-              </option>
-            ))}
-          </select>
-          {erros.salaId && <div className="invalid-feedback">{erros.salaId}</div>}
-        </div>
-
-        <div className="col-md-6">
-          <label className="form-label">Data e Horário</label>
-          <input 
-            type="datetime-local" 
-            className={`form-control ${erros.dataHora ? 'is-invalid' : ''}`}
-            name="dataHora" 
-            value={dadosFormulario.dataHora} 
-            onChange={lidarComMudanca} 
+          <CampoSelect
+             label="Filme"
+             name="filmeId"
+             value={dadosFormulario.filmeId}
+             onChange={lidarComMudanca}
+             erro={erros.filmeId}
+             placeholder="Selecione um Filme..."
+             opcoes={filmes.map(f => ({ label: f.titulo, value: f.id! }))}
           />
-          {erros.dataHora && <div className="invalid-feedback">{erros.dataHora}</div>}
         </div>
 
-        <div className="col-12">
-          <button type="submit" className="btn btn-success">Agendar Sessão</button>
-          <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate('/sessoes')}>Cancelar</button>
+        <div className="col-md-6">
+          <CampoSelect
+             label="Sala"
+             name="salaId"
+             value={dadosFormulario.salaId}
+             onChange={lidarComMudanca}
+             erro={erros.salaId}
+             placeholder="Selecione uma Sala..."
+             opcoes={salas.map(s => ({ label: `Sala ${s.numero} (${s.capacidade} lugares)`, value: s.id! }))}
+          />
+        </div>
+
+        <div className="col-md-6">
+           <CampoTexto
+             label="Data e Hora"
+             name="dataHora"
+             type="datetime-local"
+             value={dadosFormulario.dataHora}
+             onChange={lidarComMudanca}
+             erro={erros.dataHora}
+           />
+        </div>
+
+        <div className="col-12 mt-4">
+          <Botao type="submit" variant="success" className="me-2">
+             <i className="bi bi-calendar-check me-2"></i>Agendar Sessão
+          </Botao>
+          <Botao variant="secondary" onClick={() => navigate('/sessoes')}>
+             Cancelar
+          </Botao>
         </div>
       </form>
     </div>
