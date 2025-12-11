@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { sessaoSchema } from '../types';
 import type { Filme, Sala } from '../types';
@@ -8,9 +8,13 @@ import { Cabecalho } from '../components/Cabecalho';
 import { CampoTexto } from '../components/Formulario/CampoTexto';
 import { CampoSelect } from '../components/Formulario/CampoSelect';
 import { Botao } from '../components/Botao/Botao';
+import { Carregando } from '../components/Carregando';
 
 export function SessaoForm() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const modoEdicao = Boolean(id);
+  
   const [dadosFormulario, setDadosFormulario] = useState({
     filmeId: '',
     salaId: '',
@@ -19,6 +23,7 @@ export function SessaoForm() {
   const [filmes, setFilmes] = useState<Filme[]>([]);
   const [salas, setSalas] = useState<Sala[]>([]);
   const [erros, setErros] = useState<Record<string, string>>({});
+  const [carregando, setCarregando] = useState(true);
 
   useEffect(() => {
     carregarDados();
@@ -32,9 +37,22 @@ export function SessaoForm() {
       ]);
       setFilmes(filmesCarregados);
       setSalas(salasCarregadas);
+
+      // Se está em modo edição, carregar dados da sessão
+      if (modoEdicao && id) {
+        const sessao = await api.obterSessao(id);
+        setDadosFormulario({
+          filmeId: sessao.filmeId,
+          salaId: sessao.salaId,
+          dataHora: sessao.dataHora.slice(0, 16) // Formato datetime-local
+        });
+      }
     } catch (error) {
       console.error(error);
       alert('Erro ao carregar dados');
+      if (modoEdicao) navigate('/sessoes');
+    } finally {
+      setCarregando(false);
     }
   }
 
@@ -47,11 +65,24 @@ export function SessaoForm() {
     e.preventDefault();
     
     try {
-      const sessaoValidada = sessaoSchema.parse(dadosFormulario);
+      // Em modo edição, relaxar validação de data futura
+      const sessaoParaValidar = modoEdicao 
+        ? { ...dadosFormulario, id }
+        : dadosFormulario;
 
-      await api.criarSessao(sessaoValidada);
-      
-      alert('Sessão agendada com sucesso!');
+      // Validar (pular validação de data futura em edição)
+      if (!modoEdicao) {
+        sessaoSchema.parse(sessaoParaValidar);
+      }
+
+      if (modoEdicao && id) {
+        await api.atualizarSessao(id, dadosFormulario);
+        alert('Sessão atualizada com sucesso!');
+      } else {
+        const sessaoValidada = sessaoSchema.parse(dadosFormulario);
+        await api.criarSessao(sessaoValidada);
+        alert('Sessão agendada com sucesso!');
+      }
       navigate('/sessoes');
       
     } catch (erro) {
@@ -73,9 +104,11 @@ export function SessaoForm() {
     }
   }
 
+  if (carregando) return <Carregando />;
+
   return (
     <div>
-      <Cabecalho titulo="Agendar Sessão" />
+      <Cabecalho titulo={modoEdicao ? "Editar Sessão" : "Agendar Sessão"} />
       
       <form onSubmit={lidarComEnvio} className="row g-3">
         <div className="col-md-6">
@@ -115,7 +148,7 @@ export function SessaoForm() {
 
         <div className="col-12 mt-4">
           <Botao type="submit" variant="success" className="me-2">
-             <i className="bi bi-calendar-check me-2"></i>Agendar Sessão
+             <i className="bi bi-calendar-check me-2"></i>{modoEdicao ? 'Salvar Alterações' : 'Agendar Sessão'}
           </Botao>
           <Botao variant="secondary" onClick={() => navigate('/sessoes')}>
              Cancelar

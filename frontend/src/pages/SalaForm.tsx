@@ -59,13 +59,12 @@ export function SalaForm() {
       const salaValidada = salaSchema.parse(salaParaValidar);
 
       if (id) {
-         // Atualização mockada
-         alert('Edição ainda não implementada completamente na API, criando nova para teste.');
+        await api.atualizarSala(id, salaValidada);
+        alert('Sala atualizada com sucesso!');
+      } else {
+        await api.criarSala(salaValidada);
+        alert('Sala cadastrada com sucesso!');
       }
-      
-      await api.criarSala(salaValidada);
-      
-      alert('Sala salva com sucesso!');
       navigate('/salas');
       
     } catch (erro) {

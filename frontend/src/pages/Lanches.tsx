@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import type { Lanche } from '../types';
 import { Cabecalho } from '../components/Cabecalho';
@@ -61,13 +62,21 @@ export function Lanches() {
                 titulo={lanche.nome}
                 className="h-100 shadow-sm"
                 rodape={
-                  <Botao 
-                    variant="outline-danger"
-                    tamanho="sm"
-                    onClick={() => lanche.id && lidarComExclusao(lanche.id)}
-                  >
-                     <i className="bi bi-trash"></i> Excluir
-                  </Botao>
+                  <div className="d-flex justify-content-between w-100">
+                    <Link
+                      to={`/lanches/editar/${lanche.id}`}
+                      className="btn btn-outline-primary btn-sm"
+                    >
+                      <i className="bi bi-pencil-square me-1"></i>Editar
+                    </Link>
+                    <Botao 
+                      variant="outline-danger"
+                      tamanho="sm"
+                      onClick={() => lanche.id && lidarComExclusao(lanche.id)}
+                    >
+                       <i className="bi bi-trash"></i> Excluir
+                    </Botao>
+                  </div>
                 }
               >
                   <p className="card-text text-muted">{lanche.descricao}</p>

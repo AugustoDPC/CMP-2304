@@ -125,7 +125,12 @@ export function VendaIngresso() {
         });
       }
 
-      // 2. Preparar dados dos Lanches
+      // 2. Criar ingressos no banco PRIMEIRO para obter os IDs
+      const ingressosCriados = await Promise.all(
+        novosIngressos.map(ing => api.criarIngresso(ing))
+      );
+
+      // 3. Preparar dados dos Lanches
       const itensPedido = carrinhoLanches.map(item => ({
         lancheId: item.lanche.id!,
         quantidade: item.quantidade,
@@ -133,17 +138,14 @@ export function VendaIngresso() {
         nomeLanche: item.lanche.nome
       }));
 
-      // 3. Criar Pedido
+      // 4. Criar Pedido com os ingressos que possuem os IDs do banco
       await api.criarPedido({
         dataPedido: new Date().toISOString(),
-        ingressos: novosIngressos,
+        ingressos: ingressosCriados, // Agora inclui os IDs!
         lanches: itensPedido,
         valorTotal: totalGeral,
         sessaoId: sessao.id
       });
-
-      // Hack para json-server: salvar ingressos avulsos para contar ocupação
-      await Promise.all(novosIngressos.map(ing => api.criarIngresso(ing)));
 
       alert('Pedido realizado com sucesso!');
       navegar('/pedidos'); 

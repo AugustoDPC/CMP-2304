@@ -62,13 +62,12 @@ export function LancheForm() {
       const lancheValidado = lancheSchema.parse(lancheParaValidar);
 
       if (id) {
-        // TODO: Implementar atualização se API suportar
-        alert('Edição ainda não implementada na API, criando novo.');
+        await api.atualizarLanche(id, lancheValidado);
+        alert('Lanche atualizado com sucesso!');
+      } else {
+        await api.criarLanche(lancheValidado);
+        alert('Lanche cadastrado com sucesso!');
       }
-      
-      await api.criarLanche(lancheValidado);
-      
-      alert('Lanche salvo com sucesso!');
       navigate('/lanches');
       
     } catch (erro) {

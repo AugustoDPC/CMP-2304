@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import type { Sala } from '../types';
@@ -66,14 +67,25 @@ export function Salas() {
                 <tr key={sala.id}>
                   <td>{sala.numero}</td>
                   <td>{sala.capacidade} lugares</td>
-                  <td>
-                    <button 
-                      onClick={() => lidarComExclusao(sala.id!)} 
-                      className="btn btn-outline-danger btn-sm"
-                      title="Excluir"
-                    >
-                      <i className="bi bi-trash"></i>
-                    </button>
+                  <td className="text-center">
+                    <div className="btn-group btn-group-sm" role="group">
+                      <Link
+                        to={`/salas/editar/${sala.id}`}
+                        className="btn btn-outline-primary"
+                        title="Editar"
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                      </Link>
+
+                      <button
+                        onClick={() => sala.id && lidarComExclusao(sala.id)}
+                        className="btn btn-outline-danger"
+                        title="Excluir"
+                        type="button"
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

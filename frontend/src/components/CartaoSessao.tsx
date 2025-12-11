@@ -20,18 +20,23 @@ export function CartaoSessao({ sessao, aoExcluir }: CartaoSessaoProps) {
         className="h-100 border-start border-4 border-primary"
         titulo={sessao.filme?.titulo || 'Filme não encontrado'}
         rodape={
-          <div className="d-flex justify-content-between w-100">
+          <div className="d-flex justify-content-between align-items-center w-100">
             <Link to={`/sessoes/${sessao.id}/vender`} className="btn btn-success btn-sm">
-               <i className="bi bi-ticket-perforated me-1"></i>Vender Ingresso
+               <i className="bi bi-ticket-perforated me-1"></i>Vender
             </Link>
-            <Botao 
-               variant="outline-danger" 
-               tamanho="sm"
-               onClick={() => sessao.id && aoExcluir(sessao.id)}
-               title="Cancelar Sessão"
-            >
-               <i className="bi bi-trash"></i>
-            </Botao>
+            <div className="btn-group btn-group-sm">
+              <Link to={`/sessoes/editar/${sessao.id}`} className="btn btn-outline-primary">
+                <i className="bi bi-pencil-square"></i>
+              </Link>
+              <Botao 
+                 variant="outline-danger" 
+                 tamanho="sm"
+                 onClick={() => sessao.id && aoExcluir(sessao.id)}
+                 title="Cancelar Sessão"
+              >
+                 <i className="bi bi-trash"></i>
+              </Botao>
+            </div>
           </div>
         }
       >

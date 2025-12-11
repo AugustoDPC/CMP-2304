@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import type { Pedido } from '../types';
 import { Cabecalho } from '../components/Cabecalho';
@@ -27,6 +28,32 @@ export function Pedidos() {
     }
   }
 
+  async function lidarComExclusao(id: string) {
+    if (!confirm('Tem certeza que deseja excluir este pedido? Os ingressos também serão excluídos.')) return;
+    
+    try {
+      // Buscar o pedido para obter os ingressos
+      const pedidoParaExcluir = pedidos.find(p => p.id === id);
+      
+      if (pedidoParaExcluir && pedidoParaExcluir.ingressos.length > 0) {
+        // Excluir todos os ingressos do pedido
+        await Promise.all(
+          pedidoParaExcluir.ingressos.map(ing => 
+            ing.id ? api.excluirIngresso(ing.id) : Promise.resolve()
+          )
+        );
+      }
+      
+      // Excluir o pedido
+      await api.excluirPedido(id);
+      setPedidos(pedidos.filter(p => p.id !== id));
+      alert('Pedido e ingressos excluídos com sucesso!');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao excluir pedido');
+    }
+  }
+
   if (carregando) return <Carregando />;
 
   return (
@@ -38,12 +65,13 @@ export function Pedidos() {
       ) : (
         <div className="table-responsive">
           <table className="table table-striped table-hover">
-            <thead>
+            <thead className="table-dark">
               <tr>
                 <th>Data</th>
                 <th>Total</th>
                 <th>Itens</th>
                 <th>ID</th>
+                <th className="text-center">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -66,6 +94,25 @@ export function Pedidos() {
                     )}
                   </td>
                   <td className="text-muted small">{pedido.id}</td>
+                  <td className="text-center">
+                    <div className="btn-group btn-group-sm" role="group">
+                      <Link
+                        to={`/pedidos/editar/${pedido.id}`}
+                        className="btn btn-outline-primary"
+                        title="Editar"
+                      >
+                        <i className="bi bi-pencil-square"></i>
+                      </Link>
+                      <button
+                        onClick={() => pedido.id && lidarComExclusao(pedido.id)}
+                        className="btn btn-outline-danger"
+                        title="Excluir"
+                        type="button"
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>

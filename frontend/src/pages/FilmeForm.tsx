@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { filmeSchema } from '../types';
 import { z } from 'zod';
@@ -9,6 +9,9 @@ import { Botao } from '../components/Botao/Botao';
 
 export function FilmeForm() {
   const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const modoEdicao = Boolean(id);
+  
   const [dadosFormulario, setDadosFormulario] = useState({
     titulo: '',
     sinopse: '',
@@ -18,6 +21,29 @@ export function FilmeForm() {
     dataInicialExibicao: '',
     dataFinalExibicao: ''
   });
+
+  useEffect(() => {
+    if (modoEdicao && id) {
+      (async () => {
+        try {
+          const filme = await api.obterFilme(id);
+          setDadosFormulario({
+            titulo: filme.titulo ?? '',
+            sinopse: filme.sinopse ?? '',
+            duracao: filme.duracao?.toString() ?? '',
+            classificacao: filme.classificacao ?? '',
+            genero: filme.genero ?? '',
+            dataInicialExibicao: filme.dataInicialExibicao?.split('T')[0] ?? '',
+            dataFinalExibicao: filme.dataFinalExibicao?.split('T')[0] ?? ''
+          });
+        } catch (error) {
+          console.error(error);
+          alert('Erro ao carregar filme para edição');
+          navigate('/filmes');
+        }
+      })();
+    }
+  }, [modoEdicao, id]);
   const [erros, setErros] = useState<Record<string, string>>({});
 
   function lidarComMudanca(e: React.ChangeEvent<any>) {
@@ -39,9 +65,13 @@ export function FilmeForm() {
       const filmeValidado = filmeSchema.parse(filmeParaValidar);
 
       // Enviar para API
-      await api.criarFilme(filmeValidado);
-      
-      alert('Filme cadastrado com sucesso!');
+      if (modoEdicao && id) {
+        await api.atualizarFilme(id, filmeValidado);
+        alert('Filme atualizado com sucesso!');
+      } else {
+        await api.criarFilme(filmeValidado);
+        alert('Filme cadastrado com sucesso!');
+      }
       navigate('/filmes');
       
     } catch (erro) {
@@ -65,7 +95,7 @@ export function FilmeForm() {
 
   return (
     <div>
-      <h2 className="mb-4">Novo Filme</h2>
+      <h2 className="mb-4">{modoEdicao ? 'Editar Filme' : 'Novo Filme'}</h2>
       <form onSubmit={lidarComEnvio} className="row g-3">
         <div className="col-md-6">
           <CampoTexto
